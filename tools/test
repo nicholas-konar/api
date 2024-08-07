@@ -20,7 +20,7 @@ echo "Running tests in watch mode..."
 docker-compose run --rm \
     -v "$(pwd)":/app \
     -v /app/node_modules \
-    app yarn test --watch
+    app yarn test "$@" --watch
 
 # If we get here, it means the command was terminated
 cleanup
