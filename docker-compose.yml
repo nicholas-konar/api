@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_USER=test_username
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=test_db
+      - POSTGRES_PORT=5432
+      - NODE_ENV=test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # Command will be overridden when running in watch mode
+    command: yarn test
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=test_username
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=test_db
+    ports:
+      - "5432:5432"

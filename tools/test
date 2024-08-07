@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Change to the project root directory
+cd "$(dirname "$0")/.." || exit
+
+# Function to cleanup
+cleanup() {
+    echo "Cleaning up..."
+    docker-compose down
+    exit 0
+}
+
+# Trap SIGINT and SIGTERM signals and run cleanup
+trap cleanup SIGINT SIGTERM
+
+echo "Building Docker images..."
+docker-compose build
+
+echo "Running tests in watch mode..."
+docker-compose run --rm \
+    -v "$(pwd)":/app \
+    -v /app/node_modules \
+    app yarn test --watch
+
+# If we get here, it means the command was terminated
+cleanup
