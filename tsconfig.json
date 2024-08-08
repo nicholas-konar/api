@@ -24,8 +24,10 @@
       "@interfaces/*": ["src/interfaces/*"],
       "@config": ["src/config"],
       "@config/*": ["src/config/*"],
-      "@models": ["src/database/models"],
-      "@models/*": ["src/database/models/*"],
+      "@db": ["src/db"],
+      "@db/*": ["src/db/*"],
+      "@entity": ["src/db/entity"],
+      "@entity/*": ["src/db/entity/*"],
       "@util": ["src/util"],
       "@util/*": ["src/util/*"],
       "@constants": ["src/constants"],
@@ -50,6 +52,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictNullChecks": false
   }
 }

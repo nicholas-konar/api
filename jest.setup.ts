@@ -1,7 +1,9 @@
-beforeAll(() => {
-  console.log('Mock DB setup!')
+import { AppDataSource } from './src/db/data-source'
+
+beforeAll(async () => {
+  await AppDataSource.initialize()
 })
 
-afterAll(() => {
-  console.log('Mock DB teardown!')
+afterAll(async () => {
+  await AppDataSource.destroy()
 })
