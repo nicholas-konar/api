@@ -1,13 +1,14 @@
+
 import Koa from 'koa'
-import Router from 'koa-router'
+import bodyParser from '@koa/bodyparser'
+import healthCheckRouter from '@routers/health-check'
+import onboardingRouter from '@routers/onboarding'
 
 const app = new Koa()
-const router = new Router()
 
-router.get('/healthz', async ctx => {
-  ctx.status = 200
-})
+app.use(bodyParser())
 
-app.use(router.routes()).use(router.allowedMethods())
+app.use(healthCheckRouter.routes()).use(healthCheckRouter.allowedMethods())
+app.use(onboardingRouter.routes()).use(onboardingRouter.allowedMethods())
 
 export default app
