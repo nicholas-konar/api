@@ -11,8 +11,11 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await repo.clear()
   await stopServer()
+})
+
+afterEach(async () => {
+  await repo.clear()
 })
 
 describe('onboarding steps', () => {
