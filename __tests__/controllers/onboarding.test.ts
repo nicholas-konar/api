@@ -35,6 +35,14 @@ describe('onboarding steps', () => {
     expect(next).toBe(step + 1)
   })
 
+  it('422 on no email', async () => {
+    await request(server).post('/o/email').send({ email: '' }).expect(422)
+  })
+
+  it('422 on bad email', async () => {
+    await request(server).post('/o/email').send({ email: 'foo' }).expect(422)
+  })
+
   it('collect username and password', async () => {
     const step = 1
     const email = 'foo@bar.com'
@@ -43,7 +51,11 @@ describe('onboarding steps', () => {
     const user = await fakeUser({ email })
     const res = await request(server)
       .post('/o/login')
-      .send({ username, password })
+      .send({
+        userId: user.id,
+        username,
+        password,
+      })
       .expect(200)
     const { userId, next } = res.body
     await user.reload()
@@ -55,11 +67,18 @@ describe('onboarding steps', () => {
     expect(next).toBe(step + 1)
   })
 
-  it('422 on no email', async () => {
-    await request(server).post('/o/email').send({ email: '' }).expect(422)
-  })
-
-  it('422 on bad email', async () => {
-    await request(server).post('/o/email').send({ email: 'foo' }).expect(422)
+  it('username taken', async () => {
+    const email = 'foo@bar.com'
+    const username = 'foo'
+    const password = 'bar'
+    const user = await fakeUser({ email, username })
+    await request(server)
+      .post('/o/login')
+      .send({
+        userId: user.id,
+        username,
+        password,
+      })
+      .expect(422)
   })
 })
