@@ -93,7 +93,7 @@ export class User extends BaseEntity {
     return argon2.verify(this.password, password)
   }
 
-  private async update(data: Partial<User>): Promise<this> {
+  public async update(data: Partial<User>): Promise<this> {
     Object.assign(this, data)
     return this.save()
   }

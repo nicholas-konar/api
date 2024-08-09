@@ -20,10 +20,9 @@ it('create user', async () => {
 
 it('set username and password', async () => {
   const email = 'foo@bar.com'
-  const data = await User.createShellAccount({ email })
   const username = 'foo'
   const password = 'bar'
-  const user = new User(data)
+  const user = new User({ email })
   await user.setUsername(username)
   await user.setPassword(password)
   const valid = await user.verifyPassword(password)

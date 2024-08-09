@@ -40,8 +40,8 @@
       "@logger/*": ["src/logger/*"],
       "@setup": ["__tests__/__setup__"],
       "@setup/*": ["__tests__/__setup__/*"],
-      "@fakes": ["__tests__/fakes"],
-      "@fakes/*": ["__tests__/fakes/*"]
+      "@fakes": ["__tests__/__setup__/fakes"],
+      "@fakes/*": ["__tests__/__setup__/fakes/*"]
     },
     "rootDirs": ["src", "__tests__"],
     "resolveJsonModule": true,

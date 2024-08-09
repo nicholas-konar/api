@@ -6,9 +6,10 @@ export default async function catchHttpErrors(ctx: Context, next: Next) {
     await next()
   } catch (e: unknown) {
     const err = e instanceof HttpError ? e : new InternalServerError()
-    const { name, message, status } = err
+    const { message, status } = err
+    const name = err.constructor.name
     ctx.status = err.status
-    ctx.body = { error: { name, message, status } }
-    console.log({ error: { name, message, status } })
+    ctx.body = { error: { name: err.name, message, status } }
+    console.error({ error: { name, message, status } })
   }
 }
