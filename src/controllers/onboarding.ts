@@ -1,9 +1,8 @@
 import { Context } from 'koa'
 import { User } from '@entity/user'
 import { AppDataSource } from '@db/data-source'
+import { InvalidEmailError } from '@errors/http-errors'
 import isEmail from 'validator/lib/isEmail'
-
-const onboardingStep = ['verifyEmail', 'setLoginCredentials']
 
 const createShellAccount = async (email: string) => {
   const userRepository = AppDataSource.getRepository(User)
@@ -18,9 +17,7 @@ async function verifyEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
 
   if (!(email && isEmail(email))) {
-    ctx.status = 400
-    ctx.body = { error: 'Email required.' }
-    return
+    throw new InvalidEmailError()
   }
 
   const user = await createShellAccount(email)

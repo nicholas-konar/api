@@ -1,12 +1,17 @@
 import { runServer, stopServer } from '@setup'
+import { AppDataSource } from '@db/data-source'
+import { Repository } from 'typeorm'
+import { User } from '@entity/user'
 import request from 'supertest'
 
-let server: any
+let server: any, repo: Repository<User>
 beforeAll(async () => {
+  repo = AppDataSource.getRepository(User)
   server = await runServer()
 })
 
 afterAll(async () => {
+  await repo.clear()
   await stopServer()
 })
 
@@ -23,10 +28,10 @@ describe('onboarding steps', () => {
   })
 
   it('400 on no email', async () => {
-    await request(server).post('/o/email').send({ email: '' }).expect(400)
+    await request(server).post('/o/email').send({ email: '' }).expect(422)
   })
 
   it('400 on bad email', async () => {
-    await request(server).post('/o/email').send({ email: 'foo' }).expect(400)
+    await request(server).post('/o/email').send({ email: 'foo' }).expect(422)
   })
 })
