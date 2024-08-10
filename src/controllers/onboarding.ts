@@ -1,18 +1,25 @@
 import { Context } from 'koa'
 import { User } from '@entity/user'
 import { AppDataSource } from '@db/data-source'
-import { InvalidEmailError, UsernameTakenError } from '@errors/http-errors'
+import {
+  InvalidEmailError,
+  EmailAlreadyInUseError,
+  UsernameTakenError,
+} from '@errors/http-errors'
 import isEmail from 'validator/lib/isEmail'
 import { assert } from '@util'
 
 async function verifyEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
 
-  assert(isEmail(email), new InvalidEmailError)
+  assert(isEmail(email), new InvalidEmailError())
 
   const repo = AppDataSource.getRepository(User)
+  const taken = await repo.findOneBy({ email })
+  assert(!taken, new EmailAlreadyInUseError())
+
   const user = await repo.save({ email })
-//   await sendEmail('verifyEmail', email)
+  //   await sendEmail('verifyEmail', email)
 
   ctx.status = 201
   ctx.body = {
@@ -25,10 +32,10 @@ async function verifyEmail(ctx: Context) {
 const setLoginCreds = async (ctx: Context) => {
   const { username, password } = ctx.request.body
   const { user } = ctx.state
-  const repo = AppDataSource.getRepository(User)
 
+  const repo = AppDataSource.getRepository(User)
   const taken = await repo.findOneBy({ username })
-  assert(!taken, new UsernameTakenError)
+  assert(!taken, new UsernameTakenError())
 
   await user.setLoginCredentials(username, password)
 

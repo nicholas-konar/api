@@ -35,6 +35,12 @@ describe('onboarding steps', () => {
     expect(next).toBe(step + 1)
   })
 
+  it('422 on email already in use', async () => {
+    const email = 'foo@bar.com'
+    await fakeUser({email})
+    await request(server).post('/o/email').send({ email }).expect(422)
+  })
+
   it('422 on no email', async () => {
     await request(server).post('/o/email').send({ email: '' }).expect(422)
   })
