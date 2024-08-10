@@ -13,7 +13,7 @@ afterEach(async () => {
 
 it('create user', async () => {
   const email = `foo@bar.com`
-  const user: User = await User.createShellAccount({ email })
+  const user: User = await User.save({ email })
   expect(user.id).toBeTruthy()
   expect(user.email).toBe(email)
 })
