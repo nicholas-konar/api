@@ -11,11 +11,11 @@ import { assert } from '@util'
 
 async function verifyEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
-  assert(email, new InvalidEmailError())
-  assert(isEmail(email), new InvalidEmailError())
+  assert(email, InvalidEmailError)
+  assert(isEmail(email), InvalidEmailError)
   const repo = AppDataSource.getRepository(User)
   const taken = await repo.findOneBy({ email })
-  assert(!taken, new EmailAlreadyInUseError())
+  assert(!taken, EmailAlreadyInUseError)
   const user = await repo.save({ email })
   //   await sendEmail('verifyEmail', email)
   ctx.status = 201
@@ -32,7 +32,7 @@ const setLoginCreds = async (ctx: Context) => {
 
   const repo = AppDataSource.getRepository(User)
   const taken = await repo.findOneBy({ username })
-  assert(!taken, new UsernameTakenError())
+  assert(!taken, UsernameTakenError)
 
   await user.setLoginCredentials(username, password)
 

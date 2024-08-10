@@ -6,11 +6,11 @@ import { Context, Next } from 'koa'
 
 export async function enrichContextWithUser(ctx: Context, next: Next) {
   const { userId } = ctx.request.body
-  assert(userId, new BadRequestError)
+  assert(userId, BadRequestError)
 
   const repo = AppDataSource.getRepository(User)
   const user = await repo.findOneBy({ id: userId })
-  assert(user, new UserNotFoundError())
+  assert(user, UserNotFoundError)
   ctx.state.user = user
   await next()
 }

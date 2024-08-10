@@ -1,6 +1,5 @@
-
-export function assert(condition: any, error: Error) {
-    if (!Boolean(condition)) {
-      throw error
-    }
+export function assert(condition: any, error: new () => Error) {
+  if (!Boolean(condition)) {
+    throw new error()
+  }
 }
