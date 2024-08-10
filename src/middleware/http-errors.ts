@@ -9,7 +9,7 @@ export default async function catchHttpErrors(ctx: Context, next: Next) {
     const { message, status } = err
     const name = err.constructor.name
     ctx.status = err.status
-    ctx.body = { error: { name: err.name, message, status } }
-    console.error({ error: { name, message, status } })
+    ctx.body = { error: { name, message, status } }
+    // console.error({ error: { name, message, status } })
   }
 }
