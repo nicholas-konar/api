@@ -8,6 +8,8 @@ import {
 } from 'typeorm'
 import { IsEmail, Length } from 'class-validator'
 import argon2 from 'argon2'
+import { assert } from '@util'
+import { EmailAlreadyInUseError, InvalidEmailError } from '@errors/http-errors'
 
 @Entity()
 export class User extends BaseEntity {
@@ -38,16 +40,6 @@ export class User extends BaseEntity {
   constructor(data?: Partial<User>) {
     super()
     Object.assign(this, data)
-  }
-
-  public static async createShellAccount(data: Partial<User>): Promise<User> {
-    const { email } = data
-    if (!email) throw new Error('Email is required to create an account.')
-    const taken = await User.findOneBy({ email })
-    if (taken) {
-      throw new Error('Email already in use.')
-    }
-    return User.save({ email })
   }
 
   public async setLoginCredentials(

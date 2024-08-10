@@ -11,16 +11,13 @@ import { assert } from '@util'
 
 async function verifyEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
-
+  assert(email, new InvalidEmailError())
   assert(isEmail(email), new InvalidEmailError())
-
   const repo = AppDataSource.getRepository(User)
   const taken = await repo.findOneBy({ email })
   assert(!taken, new EmailAlreadyInUseError())
-
   const user = await repo.save({ email })
   //   await sendEmail('verifyEmail', email)
-
   ctx.status = 201
   ctx.body = {
     msg: 'Verification email sent.',
