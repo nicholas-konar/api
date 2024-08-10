@@ -13,7 +13,9 @@ afterEach(async () => {
 
 it('create user', async () => {
   const email = `foo@bar.com`
-  const user: User = await User.save({ email })
+  const user = new User({ email })
+  await user.save()
+  await user.reload()
   expect(user.id).toBeTruthy()
   expect(user.email).toBe(email)
 })
@@ -25,6 +27,7 @@ it('set username and password', async () => {
   const user = new User({ email })
   await user.setUsername(username)
   await user.setPassword(password)
+  await user.reload()
   const valid = await user.verifyPassword(password)
   expect(user.username).toBe(username)
   expect(user.password).toBeTruthy()
