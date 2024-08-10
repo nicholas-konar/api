@@ -1,6 +1,5 @@
-import { User } from '@db/entity/user'
+import { User } from '@entity/user'
 
 export const fakeUser = async (opts: Partial<User> = {}): Promise<User> => {
-        const user = new User()
-        return user.update(opts)
+  return new User(opts).save()
 }
