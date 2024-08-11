@@ -40,3 +40,9 @@ export class UsernameTakenError extends HttpError {
     super(message, 422)
   }
 }
+
+export class MissingJwtError extends HttpError {
+  constructor(message = 'Missing JWT') {
+    super(message, 422)
+  }
+}
