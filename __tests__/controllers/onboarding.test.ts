@@ -1,13 +1,12 @@
-import { runServer, stopServer } from '@setup'
-import { AppDataSource } from '@db/data-source'
-import { Repository } from 'typeorm'
-import { User } from '@entity/user'
 import request from 'supertest'
+import { runServer, stopServer } from '@setup'
+import { User } from '@entity/user'
 import { fakeUser } from '@fakes/user'
+import { PendingCredential } from '@db/entity/pending-credential'
+import { savePendingCredential } from '@services/pending-credential'
 
-let server: any, repo: Repository<User>
+let server: any
 beforeAll(async () => {
-  repo = AppDataSource.getRepository(User)
   server = await runServer()
 })
 
@@ -16,7 +15,8 @@ afterAll(async () => {
 })
 
 afterEach(async () => {
-  await repo.clear()
+  await User.clear()
+  await PendingCredential.clear()
 })
 
 describe('onboarding steps', () => {
@@ -27,18 +27,21 @@ describe('onboarding steps', () => {
       .post('/o/email')
       .send({ email })
       .expect(201)
-    const { userId, next } = res.body
-    const user = await repo.findOneBy({ id: userId })
-    expect(user.id).toBe(userId)
-    expect(user.email).toBe(email)
-    expect(user.emailVerified).toBe(false)
+    const { next } = res.body
+    const [pending, count] = await PendingCredential.findAndCount({
+      where: { credential: email },
+    })
     expect(next).toBe(step + 1)
+    expect(pending[0].credential).toBe(email)
+    expect(count).toBe(1)
   })
 
   it('422 on email already in use', async () => {
-    const email = 'foo@bar.com'
-    await fakeUser({email})
-    await request(server).post('/o/email').send({ email }).expect(422)
+    const user = await fakeUser()
+    await request(server)
+      .post('/o/email')
+      .send({ email: user.email })
+      .expect(422)
   })
 
   it('422 on no email', async () => {
@@ -48,25 +51,26 @@ describe('onboarding steps', () => {
   it('422 on bad email', async () => {
     await request(server).post('/o/email').send({ email: 'foo' }).expect(422)
   })
+})
 
+describe('set login credentials', () => {
   it('collect username and password', async () => {
     const step = 1
     const email = 'foo@bar.com'
     const username = 'foo'
     const password = 'bar'
-    const user = await fakeUser({ email })
+    const { token } = await savePendingCredential(email, 'email')
     const res = await request(server)
-      .post('/o/login')
+      .post(`/o/verify/${token}`)
       .send({
-        userId: user.id,
         username,
         password,
       })
       .expect(200)
     const { userId, next } = res.body
-    await user.reload()
+    const user = await User.findOneBy({ id: userId })
     const valid = await user.verifyPassword(password)
-    expect(user.id).toBe(userId)
+    expect(user.email).toBe(email)
     expect(user.username).toBe(username)
     expect(user.password).toBeTruthy()
     expect(valid).toBe(true)
@@ -77,9 +81,10 @@ describe('onboarding steps', () => {
     const email = 'foo@bar.com'
     const username = 'foo'
     const password = 'bar'
+    const { token } = await savePendingCredential(email, 'email')
     const user = await fakeUser({ email, username })
     await request(server)
-      .post('/o/login')
+      .post(`/o/verify/${token}`)
       .send({
         userId: user.id,
         username,

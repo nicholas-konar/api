@@ -1,40 +1,49 @@
 import { Context } from 'koa'
 import { User } from '@entity/user'
-import { AppDataSource } from '@db/data-source'
 import {
   InvalidEmailError,
   EmailAlreadyInUseError,
   UsernameTakenError,
+  UserNotFoundError,
+  ExpiredLinkError,
 } from '@errors/http-errors'
 import isEmail from 'validator/lib/isEmail'
 import { assert } from '@util'
+import { savePendingCredential } from '@services/pending-credential'
+import { PendingCredential } from '@db/entity/pending-credential'
 
-async function verifyEmail(ctx: Context) {
+async function sendVerificationEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
-  assert(email, InvalidEmailError)
+
   assert(isEmail(email), InvalidEmailError)
-  const repo = AppDataSource.getRepository(User)
-  const taken = await repo.findOneBy({ email })
+
+  const taken = await User.findOneBy({ email })
   assert(!taken, EmailAlreadyInUseError)
-  const user = await repo.save({ email })
-  //   await sendEmail('verifyEmail', email)
+
+  await savePendingCredential(email, 'email')
+  // send email
+
   ctx.status = 201
   ctx.body = {
     msg: 'Verification email sent.',
-    userId: user.id,
     next: 1,
   }
 }
 
 const setLoginCreds = async (ctx: Context) => {
+  const { token } = ctx.params
   const { username, password } = ctx.request.body
-  const { user } = ctx.state
 
-  const repo = AppDataSource.getRepository(User)
-  const taken = await repo.findOneBy({ username })
+  const pending = await PendingCredential.findOneBy({ token })
+  assert(pending, UserNotFoundError)
+  assert(pending.isValid(), ExpiredLinkError)
+
+  const taken = await User.findOneBy({ username })
   assert(!taken, UsernameTakenError)
 
-  await user.setLoginCredentials(username, password)
+  const user = new User({ username, email: pending.credential })
+  await user.setPassword(password)
+  await user.save()
 
   ctx.status = 200
   ctx.body = {
@@ -44,4 +53,4 @@ const setLoginCreds = async (ctx: Context) => {
   }
 }
 
-export default { verifyEmail, setLoginCreds }
+export default { sendVerificationEmail, setLoginCreds }

@@ -6,12 +6,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-
-enum CredentialType {
-  email = 'email',
-  phone = 'phone',
-  btcAddress = 'btc_address',
-}
+import { CredentialType } from '@types'
 
 @Entity()
 export class PendingCredential extends BaseEntity {
@@ -25,8 +20,8 @@ export class PendingCredential extends BaseEntity {
   @Column()
   credential: string
 
-  @Column({ type: 'enum', enum: CredentialType })
-  type: keyof typeof CredentialType
+  @Column({ type: 'enum', enum: ['email', 'phone', 'btc_address'] })
+  type: CredentialType
 
   @Column()
   expiry: number
