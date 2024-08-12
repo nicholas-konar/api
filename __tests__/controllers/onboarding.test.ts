@@ -14,7 +14,7 @@ afterAll(async () => {
   await stopServer()
 })
 
-afterEach(async () => {
+beforeEach(async () => {
   await User.clear()
   await PendingCredential.clear()
 })
