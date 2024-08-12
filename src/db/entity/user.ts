@@ -9,7 +9,7 @@ import {
 import { IsEmail, Length } from 'class-validator'
 import argon2 from 'argon2'
 import { assert } from '@util'
-import { UsernameTakenError } from '@errors/http-errors'
+import { EmailAlreadyInUseError, UsernameTakenError } from '@errors/http-errors'
 
 @Entity()
 export class User extends BaseEntity {
@@ -42,7 +42,13 @@ export class User extends BaseEntity {
     Object.assign(this, data)
   }
 
-  public async setUsername(username: string) {
+  public async setEmailOrFail(email: string) {
+    const emailTaken = await User.findOneBy({ email })
+    assert(!emailTaken, EmailAlreadyInUseError)
+    this.email = email
+  }
+
+  public async setUsernameOrFail(username: string) {
     const usernameTaken = await User.findOneBy({ username })
     assert(!usernameTaken, UsernameTakenError)
     this.username = username
