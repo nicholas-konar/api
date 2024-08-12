@@ -1,4 +1,10 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 
 enum CredentialType {
   email = 'email',
@@ -20,11 +26,17 @@ export class PendingCredential extends BaseEntity {
   @Column({ type: 'enum', enum: CredentialType })
   type: keyof typeof CredentialType
 
-  @CreateDateColumn()
+  @Column()
+  expiry: number
+
+  @Column({type: 'bigint'})
   createdAt: number
 
   constructor(data?: Partial<PendingCredential>) {
     super()
-    Object.assign(this, data)
+    this.createdAt = Date.now()
+    Object.assign(this, { createdAt: Date.now(), ...data })
   }
+
+  isValid = () => this.createdAt + this.expiry > Date.now()
 }
