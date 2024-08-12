@@ -46,3 +46,9 @@ export class MissingJwtError extends HttpError {
     super(message, 422)
   }
 }
+
+export class ExpiredLinkError extends HttpError {
+  constructor(message = 'This Link Has Expired') {
+    super(message, 422)
+  }
+}
