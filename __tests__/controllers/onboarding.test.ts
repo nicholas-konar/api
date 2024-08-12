@@ -81,8 +81,8 @@ describe('set login credentials', () => {
     const email = 'foo@bar.com'
     const username = 'foo'
     const password = 'bar'
+    const user = await fakeUser({ username })
     const { token } = await savePendingCredential(email, 'email')
-    const user = await fakeUser({ email, username })
     await request(server)
       .post(`/o/verify/${token}`)
       .send({
