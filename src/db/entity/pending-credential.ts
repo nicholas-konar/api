@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
@@ -17,7 +18,8 @@ export class PendingCredential extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column()
+  @Index()
+  @Column({ unique: true })
   token: string
 
   @Column()
@@ -29,14 +31,13 @@ export class PendingCredential extends BaseEntity {
   @Column()
   expiry: number
 
-  @Column({type: 'bigint'})
-  createdAt: number
+  @CreateDateColumn()
+  createdAt: Date
 
   constructor(data?: Partial<PendingCredential>) {
     super()
-    this.createdAt = Date.now()
-    Object.assign(this, { createdAt: Date.now(), ...data })
+    Object.assign(this, data)
   }
 
-  isValid = () => this.createdAt + this.expiry > Date.now()
+  isValid = () => this.createdAt.getTime() + this.expiry > Date.now()
 }
