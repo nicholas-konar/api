@@ -52,3 +52,9 @@ export class ExpiredLinkError extends HttpError {
     super(message, 422)
   }
 }
+
+export class DeadLinkError extends HttpError {
+  constructor(message = 'This Link Is Dead') {
+    super(message, 422)
+  }
+}

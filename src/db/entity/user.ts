@@ -42,10 +42,11 @@ export class User extends BaseEntity {
     Object.assign(this, data)
   }
 
-  public async setEmailOrFail(email: string) {
+  public async setEmailOrFail(email: string, verified: boolean = false) {
     const emailTaken = await User.findOneBy({ email })
     assert(!emailTaken, EmailAlreadyInUseError)
     this.email = email
+    this.emailVerified = verified
   }
 
   public async setUsernameOrFail(username: string) {

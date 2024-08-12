@@ -4,13 +4,13 @@ import {
   InvalidEmailError,
   EmailAlreadyInUseError,
   UsernameTakenError,
-  UserNotFoundError,
   ExpiredLinkError,
+  DeadLinkError,
 } from '@errors/http-errors'
 import isEmail from 'validator/lib/isEmail'
 import { assert } from '@util'
-import { savePendingCredential } from '@services/pending-credential'
 import { PendingCredential } from '@db/entity/pending-credential'
+import onboarding from '@services/onboarding'
 
 async function sendVerificationEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
@@ -20,7 +20,7 @@ async function sendVerificationEmail(ctx: Context) {
   const taken = await User.findOneBy({ email })
   assert(!taken, EmailAlreadyInUseError)
 
-  await savePendingCredential(email, 'email')
+  await onboarding.savePendingCredential(email, 'email')
   // send email
 
   ctx.status = 201
@@ -34,20 +34,24 @@ const setLoginCreds = async (ctx: Context) => {
   const { token } = ctx.params
   const { username, password } = ctx.request.body
 
-  const pending = await PendingCredential.findOneBy({ token })
-  assert(pending, UserNotFoundError)
+  const pending = await PendingCredential.findOneBy({ token, type: 'email' })
+  assert(pending, DeadLinkError)
   assert(pending.isValid(), ExpiredLinkError)
 
   const taken = await User.findOneBy({ username })
   assert(!taken, UsernameTakenError)
 
-  const user = new User({ username, email: pending.credential })
-  await user.setPassword(password)
-  await user.save()
+  const user = await onboarding.createShellAccount({
+    email: pending.credential,
+    emailVerified: true,
+    username,
+    password,
+  })
+  await pending.softRemove()
 
   ctx.status = 200
   ctx.body = {
-    msg: 'Username and password saved successfully',
+    msg: 'Account created successfully',
     userId: user.id,
     next: 2,
   }

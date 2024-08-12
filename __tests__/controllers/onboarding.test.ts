@@ -3,7 +3,7 @@ import { runServer, stopServer } from '@setup'
 import { User } from '@entity/user'
 import { fakeUser } from '@fakes/user'
 import { PendingCredential } from '@db/entity/pending-credential'
-import { savePendingCredential } from '@services/pending-credential'
+import onboarding from '@services/onboarding'
 
 let server: any
 beforeAll(async () => {
@@ -59,7 +59,7 @@ describe('set login credentials', () => {
     const email = 'foo@bar.com'
     const username = 'foo'
     const password = 'bar'
-    const { token } = await savePendingCredential(email, 'email')
+    const { token } = await onboarding.savePendingCredential(email, 'email')
     const res = await request(server)
       .post(`/o/verify/${token}`)
       .send({
@@ -82,7 +82,7 @@ describe('set login credentials', () => {
     const username = 'foo'
     const password = 'bar'
     const user = await fakeUser({ username })
-    const { token } = await savePendingCredential(email, 'email')
+    const { token } = await onboarding.savePendingCredential(email, 'email')
     await request(server)
       .post(`/o/verify/${token}`)
       .send({

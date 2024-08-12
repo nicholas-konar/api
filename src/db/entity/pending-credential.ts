@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   PrimaryGeneratedColumn,
@@ -28,6 +29,9 @@ export class PendingCredential extends BaseEntity {
 
   @CreateDateColumn()
   createdAt: Date
+
+  @DeleteDateColumn()
+  deletedAt: Date
 
   constructor(data?: Partial<PendingCredential>) {
     super()
