@@ -5,16 +5,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  OneToMany,
+  DeleteDateColumn,
 } from 'typeorm'
 import { IsEmail, Length } from 'class-validator'
 import argon2 from 'argon2'
 import { assert } from '@util'
 import { EmailAlreadyInUseError, UsernameTakenError } from '@errors/http-errors'
+import { GroupUserPermissions } from './group-user-permissions'
 
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
+
+  @OneToMany(() => GroupUserPermissions, () => {}, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  permissions: GroupUserPermissions[]
 
   @Length(3, 20)
   @Column({ unique: true })
@@ -25,7 +34,7 @@ export class User extends BaseEntity {
   password: string
 
   @IsEmail()
-  @Column()
+  @Column({ unique: true })
   email: string
 
   @Column({ default: false })
@@ -36,6 +45,9 @@ export class User extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date
+
+  @DeleteDateColumn()
+  deletedAt: Date
 
   constructor(data?: Partial<User>) {
     super()
