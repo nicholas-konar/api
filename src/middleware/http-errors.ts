@@ -1,5 +1,6 @@
 import { HttpError, InternalServerError } from '@errors/http-errors'
 import { Context, Next } from 'koa'
+import log from '@logger'
 
 export default async function catchHttpErrors(ctx: Context, next: Next) {
   try {
@@ -11,6 +12,6 @@ export default async function catchHttpErrors(ctx: Context, next: Next) {
     const error = { name, message, status }
     ctx.status = error.status
     ctx.body = { error }
-    // console.error({ error })
+    log.error({ error })
   }
 }
