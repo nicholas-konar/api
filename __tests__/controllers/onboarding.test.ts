@@ -1,7 +1,7 @@
 import request from 'supertest'
 import { runServer, stopServer } from '@setup'
 import { User } from '@entity/user'
-import { fakeUser } from '@fakes/user'
+import { fakeUser } from '@fakes'
 import { PendingCredential } from '@db/entity/pending-credential'
 import onboarding from '@services/onboarding'
 
