@@ -11,6 +11,8 @@ import isEmail from 'validator/lib/isEmail'
 import { assert } from '@util'
 import { PendingCredential } from '@db/entity/pending-credential'
 import onboarding from '@services/onboarding'
+import { AppDataSource } from '@db/data-source'
+import { EntityManager } from 'typeorm'
 
 async function sendVerificationEmail(ctx: Context) {
   const { email } = ctx.request.body as { email: string }
@@ -33,22 +35,21 @@ async function sendVerificationEmail(ctx: Context) {
 const setLoginCreds = async (ctx: Context) => {
   const { token } = ctx.params
   const { username, password } = ctx.request.body
-
   const pending = await PendingCredential.findOneBy({ token, type: 'email' })
   assert(pending, DeadLinkError)
   assert(pending.isValid(), ExpiredLinkError)
-
   const taken = await User.findOneBy({ username })
   assert(!taken, UsernameTakenError)
-
-  const user = await onboarding.createShellAccount({
+  const user = new User({
     email: pending.credential,
     emailVerified: true,
     username,
-    password,
   })
-  await pending.softRemove()
-
+  await user.setPassword(password)
+  await AppDataSource.transaction(async (db: EntityManager) => {
+    db.save(user)
+    db.softRemove(pending)
+  })
   ctx.status = 200
   ctx.body = {
     msg: 'Account created successfully',

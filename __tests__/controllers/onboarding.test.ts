@@ -1,9 +1,10 @@
 import request from 'supertest'
-import { runServer, stopServer } from '@setup'
+import { runServer, stopServer, truncateTables } from '@setup'
 import { User } from '@entity/user'
 import { fakeUser } from '@fakes'
 import { PendingCredential } from '@db/entity/pending-credential'
 import onboarding from '@services/onboarding'
+import crypto from 'crypto'
 
 let server: any
 beforeAll(async () => {
@@ -15,8 +16,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await User.clear()
-  await PendingCredential.clear()
+  await truncateTables([User, PendingCredential])
 })
 
 describe('onboarding steps', () => {
@@ -59,21 +59,23 @@ describe('set login credentials', () => {
     const email = 'foo@bar.com'
     const username = 'foo'
     const password = 'bar'
-    const { token } = await onboarding.savePendingCredential(email, 'email')
+    const pending = await onboarding.savePendingCredential(email, 'email')
     const res = await request(server)
-      .post(`/o/verify/${token}`)
+      .post(`/o/verify/${pending.token}`)
       .send({
         username,
         password,
       })
       .expect(200)
     const { userId, next } = res.body
+    const gone = await PendingCredential.findOneBy({ token: pending.token })
     const user = await User.findOneBy({ id: userId })
     const valid = await user.verifyPassword(password)
     expect(user.email).toBe(email)
     expect(user.username).toBe(username)
     expect(user.password).toBeTruthy()
     expect(valid).toBe(true)
+    expect(gone).toBeNull()
     expect(next).toBe(step + 1)
   })
 
