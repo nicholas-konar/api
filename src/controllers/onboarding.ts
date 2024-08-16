@@ -32,7 +32,7 @@ async function sendVerificationEmail(ctx: Context) {
   }
 }
 
-const setLoginCreds = async (ctx: Context) => {
+async function setLoginCreds(ctx: Context) {
   const { token } = ctx.params
   const { username, password } = ctx.request.body
   const pending = await PendingCredential.findOneBy({ token, type: 'email' })
