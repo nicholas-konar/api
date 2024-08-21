@@ -7,8 +7,10 @@ import {
   BaseEntity,
   DeleteDateColumn,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm'
 import { Length } from 'class-validator'
+import { User } from './user'
 
 @Entity()
 export class Group extends BaseEntity {
@@ -22,23 +24,12 @@ export class Group extends BaseEntity {
   @Column({ nullable: true })
   description: string
 
-  @Column({ nullable: true })
-  url: string
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'ownerId' })
+  owner: User
 
-  @Column({ default: false })
-  requestToJoin: boolean
-
-  @Column({ nullable: true })
-  requestToJoinPrompt: string
-
-  @Column({ nullable: true })
-  city: string
-
-  @Column({ nullable: true })
-  state: string
-
-  @JoinColumn()
-  createdBy: string
+  @Column()
+  ownerId: string
 
   @CreateDateColumn()
   createdAt: Date
@@ -48,4 +39,9 @@ export class Group extends BaseEntity {
 
   @DeleteDateColumn()
   deletedAt: Date
+
+  constructor(data?: Partial<Group>) {
+    super()
+    Object.assign(this, data)
+  }
 }

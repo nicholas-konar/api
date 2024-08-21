@@ -12,18 +12,22 @@ import { IsEmail, Length } from 'class-validator'
 import argon2 from 'argon2'
 import { assert } from '@util'
 import { EmailAlreadyInUseError, UsernameTakenError } from '@errors/http-errors'
-import { GroupUserPermissions } from './group-user-permissions'
+import { GroupUserPermission } from './group-user-permissions'
+import { Group } from './group'
 
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @OneToMany(() => GroupUserPermissions, () => {}, {
+  @OneToMany(() => Group, group => group.owner)
+  groups: Group[]
+
+  @OneToMany(() => GroupUserPermission, () => {}, {
     cascade: true,
     onDelete: 'CASCADE',
   })
-  permissions: GroupUserPermissions[]
+  permissions: GroupUserPermission[]
 
   @Length(3, 20)
   @Column({ unique: true })
