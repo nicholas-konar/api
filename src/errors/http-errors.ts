@@ -41,6 +41,12 @@ export class UsernameTakenError extends HttpError {
   }
 }
 
+export class GroupNameTakenError extends HttpError {
+  constructor(message = 'Group Name Taken') {
+    super(message, 422)
+  }
+}
+
 export class MissingJwtError extends HttpError {
   constructor(message = 'Missing JWT') {
     super(message, 422)
