@@ -1,12 +1,12 @@
 import {
+  BaseEntity,
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  JoinColumn,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  BaseEntity,
   DeleteDateColumn,
-  JoinColumn,
   ManyToOne,
 } from 'typeorm'
 import { Length } from 'class-validator'
@@ -17,19 +17,19 @@ export class Group extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Length(3, 20)
-  @Column({ unique: true })
-  name: string
-
-  @Column({ nullable: true })
-  description: string
-
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'ownerId' })
   owner: User
 
   @Column()
   ownerId: string
+
+  @Length(3, 20)
+  @Column({ unique: true })
+  name: string
+
+  @Column({ nullable: true })
+  description: string
 
   @CreateDateColumn()
   createdAt: Date
