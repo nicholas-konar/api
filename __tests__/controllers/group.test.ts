@@ -1,10 +1,8 @@
 import request from 'supertest'
 import { runServer, stopServer, truncateTables } from '@setup'
-import { User } from '@entity/user'
+import { User, Group, GroupUserPermission, PendingCredential } from '@entity'
 import { fakeUser } from '@fakes'
-import { PendingCredential } from '@db/entity/pending-credential'
-import onboarding from '@services/onboarding'
-import crypto from 'crypto'
+import { Permission } from '@db/entity/group-user-permissions'
 
 let server: any
 beforeAll(async () => {
@@ -16,7 +14,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await truncateTables([User, PendingCredential])
+  await truncateTables([User, PendingCredential, Group, GroupUserPermission])
 })
 
 describe('group', () => {
@@ -26,26 +24,26 @@ describe('group', () => {
     const res = await request(server)
       .post(`/group/create`)
       .send({
-    userId: user.id,
+        userId: user.id,
         groupName,
       })
-      .expect(200)
-    const { userId } = res.body
-  })
+      .expect(201)
+    const { groupId } = res.body
 
-//   it('username taken', async () => {
-//     const email = 'foo@bar.com'
-//     const username = 'foo'
-//     const password = 'bar'
-//     const user = await fakeUser({ username })
-//     const { token } = await onboarding.savePendingCredential(email, 'email')
-//     await request(server)
-//       .post(`/o/verify/${token}`)
-//       .send({
-//         userId: user.id,
-//         username,
-//         password,
-//       })
-//       .expect(422)
-//   })
+    const g = await Group.findOne({
+      where: { id: groupId },
+      relations: ['owner'],
+    })
+    expect(g.name).toBe(groupName)
+    expect(g.owner.id).toBe(user.id)
+
+    // Check GroupUserPermissions
+    const arr = await GroupUserPermission.find({
+      where: { userId: user.id, groupId: g.id },
+      relations: ['user', 'group'],
+    })
+    const p = arr.find(p => p.name === Permission.ADMIN)
+    expect(p.user.id).toBe(user.id)
+    expect(p.group.id).toBe(g.id)
+  })
 })
