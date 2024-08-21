@@ -8,9 +8,11 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm'
 import { Length } from 'class-validator'
 import { User } from './user'
+import { GroupUserPermission } from './group-user-permissions'
 
 @Entity()
 export class Group extends BaseEntity {
@@ -23,6 +25,13 @@ export class Group extends BaseEntity {
 
   @Column()
   ownerId: string
+
+
+  @OneToMany(() => GroupUserPermission, permission => permission.group, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  permissions: GroupUserPermission[]
 
   @Length(3, 20)
   @Column({ unique: true })

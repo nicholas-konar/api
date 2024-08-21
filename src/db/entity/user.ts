@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   @OneToMany(() => Group, group => group.owner)
   groups: Group[]
 
-  @OneToMany(() => GroupUserPermission, () => {}, {
+  @OneToMany(() => GroupUserPermission, (p) => p.user, {
     cascade: true,
     onDelete: 'CASCADE',
   })

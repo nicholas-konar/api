@@ -11,8 +11,14 @@ export const fakeUser = async (opts: Partial<User> = {}): Promise<User> => {
   return user.save()
 }
 
-export const fakeGroup = (user: User): Promise<Group> => {
-  const group = new Group()
-  group.name = `${user.username}'s group`
-  return group.save()
+export const fakeGroup = async (
+  user: User,
+  opts: Partial<Group> = {}
+): Promise<Group> => {
+  return new Group({
+    name: `${user.username}'s group`,
+    description: 'fake description',
+    owner: user,
+    ...opts,
+  }).save()
 }

@@ -22,19 +22,25 @@ export enum Permission {
 }
 
 @Entity()
-export class GroupUserPermissions extends BaseEntity {
+export class GroupUserPermission extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string
 
-  @ManyToOne(() => User)
-  @JoinColumn()
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User
+
+  @ManyToOne(() => Group, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'groupId' })
+  group: Group
+
+  @Column()
   userId: string
 
-  @ManyToOne(() => Group)
-  @JoinColumn()
+  @Column()
   groupId: string
 
-  @Column({type: 'enum', enum: Permission})
+  @Column({ type: 'enum', enum: Permission })
   name: Permission
 
   @CreateDateColumn()
@@ -45,4 +51,9 @@ export class GroupUserPermissions extends BaseEntity {
 
   @DeleteDateColumn()
   deletedAt: Date
+
+  constructor(data?: Partial<GroupUserPermission>) {
+    super()
+    Object.assign(this, data)
+  }
 }
