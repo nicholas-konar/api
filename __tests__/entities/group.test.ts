@@ -11,11 +11,15 @@ beforeEach(async () => {
 describe('Group', () => {
   it('create group', async () => {
     const user = await fakeUser()
-    const group = await new Group({
+    await new Group({
       name: `${user.username}'s group`,
       description: 'test description',
       owner: user,
     }).save()
+    const group = await Group.findOne({
+      where: { ownerId: user.id },
+      relations: ['owner'],
+    })
     expect(group.id).toBeTruthy()
     expect(group.ownerId).toBe(user.id)
     expect(group.owner.id).toBe(user.id)
