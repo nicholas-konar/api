@@ -41,6 +41,12 @@ export class UsernameTakenError extends HttpError {
   }
 }
 
+export class GroupNotFoundError extends HttpError {
+  constructor(message = 'Group Not Found') {
+    super(message, 404)
+  }
+}
+
 export class GroupNameTakenError extends HttpError {
   constructor(message = 'Group Name Taken') {
     super(message, 422)
