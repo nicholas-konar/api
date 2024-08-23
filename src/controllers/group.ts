@@ -1,10 +1,7 @@
 import { AppDataSource } from '@db/data-source'
 import { User, Group } from '@entity'
-import {
-  GroupUserPermission,
-  Permission,
-} from '@db/entity/group-user-permissions'
-import { GroupNameTakenError } from '@errors/http-errors'
+import { GroupUserPermission } from '@db/entity/group-user-permissions'
+import { AccessDeniedError, GroupNameTakenError } from '@errors/http-errors'
 import { assert } from '@util'
 import { Context } from 'koa'
 import { EntityManager } from 'typeorm'
@@ -23,7 +20,7 @@ async function create(ctx: Context) {
       new GroupUserPermission({
         userId: user.id,
         groupId: group.id,
-        name: Permission.ADMIN,
+        feature: 'admin',
       })
     )
   })
@@ -38,6 +35,15 @@ async function create(ctx: Context) {
 async function update(ctx: Context) {
   const data = ctx.request.body
   const { user, group } = ctx.state as { user: User; group: Group }
+
+  assert(
+    await GroupUserPermission.findOneBy({
+      userId: user.id,
+      groupId: group.id,
+      feature: 'admin',
+    }),
+    AccessDeniedError
+  )
 
   const props = _.pick(data, Group.updateableFields)
   await group.update(props)
