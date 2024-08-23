@@ -2,7 +2,6 @@ import {
   Entity,
   BaseEntity,
   Column,
-  PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -13,13 +12,15 @@ import {
 import { Group } from './group'
 import { User } from './user'
 
-export enum Permission {
-  ADMIN = 'admin',
-  MOD = 'moderator',
-  NOTARY = 'notary',
-  BUY = 'buy',
-  SELL = 'sell',
+enum PermissionEnum {
+  admin = 'admin',
+  moderator = 'moderator',
+  notary = 'notary',
+  buy = 'buy',
+  sell = 'sell',
 }
+
+type Permission = keyof typeof PermissionEnum
 
 @Entity()
 export class GroupUserPermission extends BaseEntity {
@@ -40,8 +41,8 @@ export class GroupUserPermission extends BaseEntity {
   @Column()
   groupId: string
 
-  @Column({ type: 'enum', enum: Permission })
-  name: Permission
+  @Column({ type: 'enum', enum: PermissionEnum, nullable: false })
+  feature: Permission
 
   @CreateDateColumn()
   createdAt: Date
