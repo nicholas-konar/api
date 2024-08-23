@@ -14,43 +14,51 @@ import { Length } from 'class-validator'
 import { User } from './user'
 import { GroupUserPermission } from './group-user-permissions'
 
-@Entity()
-export class Group extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+ type Updateable = Pick<Group, typeof Group.updateableFields[number]>
+ export
+ @Entity()
+ class Group extends BaseEntity {
+   static readonly updateableFields = ['name', 'description'] as const
 
-  @ManyToOne(() => User, { nullable: false })
-  @JoinColumn({ name: 'ownerId' })
-  owner: User
+   @PrimaryGeneratedColumn('uuid')
+   id: string
 
-  @Column()
-  ownerId: string
+   @ManyToOne(() => User, { nullable: false })
+   @JoinColumn({ name: 'ownerId' })
+   owner: User
 
+   @Column()
+   ownerId: string
 
-  @OneToMany(() => GroupUserPermission, permission => permission.group, {
-    cascade: true,
-    onDelete: 'CASCADE',
-  })
-  permissions: GroupUserPermission[]
+   @OneToMany(() => GroupUserPermission, permission => permission.group, {
+     cascade: true,
+     onDelete: 'CASCADE',
+   })
+   permissions: GroupUserPermission[]
 
-  @Length(3, 20)
-  @Column({ unique: true })
-  name: string
+   @Length(3, 20)
+   @Column({ unique: true })
+   name: string
 
-  @Column({ nullable: true })
-  description: string
+   @Column({ nullable: true })
+   description: string
 
-  @CreateDateColumn()
-  createdAt: Date
+   @CreateDateColumn()
+   createdAt: Date
 
-  @UpdateDateColumn()
-  updatedAt: Date
+   @UpdateDateColumn()
+   updatedAt: Date
 
-  @DeleteDateColumn()
-  deletedAt: Date
+   @DeleteDateColumn()
+   deletedAt: Date
 
-  constructor(data?: Partial<Group>) {
-    super()
-    Object.assign(this, data)
-  }
-}
+   constructor(data?: Partial<Group>) {
+     super()
+     Object.assign(this, data)
+   }
+
+   public async update(data: Updateable): Promise<this> {
+     Object.assign(this, data)
+     return this.save()
+   }
+ }
