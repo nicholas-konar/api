@@ -18,6 +18,12 @@ export class BadRequestError extends HttpError {
   }
 }
 
+export class AccessDeniedError extends HttpError {
+  constructor(message = 'Access Denied') {
+    super(message, 403)
+  }
+}
+
 export class InvalidEmailError extends HttpError {
   constructor(message = 'Invalid Email') {
     super(message, 422)
