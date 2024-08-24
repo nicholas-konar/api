@@ -1,9 +1,4 @@
-import {
-  GroupUserPermission,
-  Permission as Perms,
-} from '@db/entity/group-user-permissions'
-import { User } from '@db/entity/user'
-import { Group } from '@entity/group'
+import { Group, User, GroupUserPermission } from '@entity'
 import { fakeGroup, fakeUser } from '@setup/fakes'
 import { truncateTables } from '@setup'
 
@@ -18,12 +13,12 @@ describe('group user permissions', () => {
     const perm = await new GroupUserPermission({
       group,
       user,
-      name: Perms.ADMIN,
+      feature: 'admin',
     }).save()
     expect(await GroupUserPermission.countBy({ id: perm.id })).toBe(1)
     expect(perm.userId).toBe(user.id)
     expect(perm.groupId).toBe(group.id)
-    expect(perm.name).toBe(Perms.ADMIN)
+    expect(perm.feature).toBe('admin')
   })
 
   it('cascade when group is deleted', async () => {
@@ -32,7 +27,7 @@ describe('group user permissions', () => {
     await new GroupUserPermission({
       group,
       user,
-      name: Perms.ADMIN,
+      feature: 'admin',
     }).save()
     const before = await GroupUserPermission.countBy({ groupId: group.id })
     await Group.remove(group)
@@ -48,7 +43,7 @@ describe('group user permissions', () => {
     await new GroupUserPermission({
       group,
       user,
-      name: Perms.ADMIN,
+      feature: 'admin',
     }).save()
     const before = await GroupUserPermission.countBy({ groupId: group.id })
     await User.remove(user)
